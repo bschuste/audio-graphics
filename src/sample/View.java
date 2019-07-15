@@ -8,6 +8,9 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
 public class View {
+    private XYChart.Series series;
+    private int curIndex;
+
     private int xStart;
     private int xEnd;
     private int xIncrement;
@@ -23,6 +26,12 @@ public class View {
         System.out.println("Creating a graphics View");
     }
 
+    public boolean addData(long value) {
+        series.getData().add(new XYChart.Data(curIndex, value));
+        curIndex++;
+        return true;
+    }
+
     public boolean Draw () {
 
         // Load the data to draw
@@ -32,12 +41,12 @@ public class View {
 
         // Draw parameters on timeline (x-axis time, y-axis buffer write pointer)
 
-        XYChart.Series series = new XYChart.Series();
+        series = new XYChart.Series();
         series.setName("Incoming Data");
 
-        for (int i=1; i<1500; i++) {
+        for (curIndex=1; curIndex<100; curIndex++) {
 
-            series.getData().add(new XYChart.Data(i, 0.040*i));
+            series.getData().add(new XYChart.Data(curIndex, 0.040*curIndex));
         }
         //Find Minimum and Maximum value of the series
 
@@ -90,5 +99,28 @@ public class View {
         mLinechart = new LineChart(xAxis, yAxis, lineChartData);
         return true;
     }
+
+
+    // Create the line graphics and normalize the representation axis
+    /*
+    public boolean LineChart(int xLowerBound, int xUpperBound, int yLowerBound, int yUpperBound) {
+        int seqNumber;
+        NumberAxis xAxis = new NumberAxis("Values for X-Axis", 0, 3, 1);
+        NumberAxis yAxis = new NumberAxis("Values for Y-Axis", 0, 3, 1);
+        ObservableList<XYChart.Series<Double,Double>> lineChartData = FXCollections.observableArrayList(
+                new LineChart.Series<Double,Double>("Series 1", FXCollections.observableArrayList(
+        for ()
+            new XYChart.Data<Double,Double>(0.0, 1.0),
+                    new XYChart.Data<Double,Double>(1.2, 1.4),
+                    new XYChart.Data<Double,Double>(2.2, 1.9),
+                    new XYChart.Data<Double,Double>(2.7, 2.3),
+                    new XYChart.Data<Double,Double>(2.9, 0.5)
+                ))
+        );
+        mLinechart = new LineChart(xAxis, yAxis, lineChartData);
+        return true;
+    }
+    */
+
 
 }

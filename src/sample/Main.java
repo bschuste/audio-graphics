@@ -25,8 +25,8 @@ public class Main extends Application {
         control.filterData();
 
         View view = new View();
-        //view.Draw();
-        view.LineChartSample();
+        view.Draw();
+        //view.LineChartSample();
         Group root = new Group(view.getLineChart());
 
         primaryStage.setTitle("Timestamps");
