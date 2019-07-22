@@ -1,6 +1,11 @@
 package sample;
 
+import javafx.scene.Group;
+import javafx.scene.Scene;
+
 import java.io.IOException;
+
+//TODO Interaction with User in a loop
 
 public class Controller {
 
@@ -15,20 +20,26 @@ public class Controller {
     private Model model;
     private View view;
 
-    public Controller(String logPathName, String primaryFileName, String secondaryFileName, String paramName) {
+    public Controller(View view, Model model) {
 
-//        view = new View();
-        model = new Model(logPathName, primaryFileName, secondaryFileName, paramName);
-
+        this.view = view;
+        this.model = model;
+        view.Init();
     }
 
     public boolean filterData()  throws IOException {
 
-        model.retrieveData("");
+        model.retrieveData("", (long value) -> { view.addData(value); });
 
         return true;
     }
 
+    public boolean updateView() {
+        view.Draw();
+        view.updateView();
+        return true;
+
+    }
     public boolean generateSummary() {
         return true;
     }

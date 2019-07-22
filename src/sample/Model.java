@@ -6,6 +6,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// TODO Read second file
+
 public class Model {
 
     // Retrieve the data from one or two sets
@@ -16,6 +18,10 @@ public class Model {
     private String paramName = "pts";
     private String outputFileName;
 
+
+    public Model() {
+
+    }
 
     public Model(String logPathName, String primaryFileName, String logFileNameSender, String paramName) {
         if (!logPathName.isEmpty()) {
@@ -32,8 +38,11 @@ public class Model {
         }
     }
 
+    public interface addData {
+        public void op(long value);
+    }
 
-    public boolean retrieveData(String outputFileName) throws IOException {
+    public void retrieveData(String outputFileName, addData operator) throws IOException {
 
         FileReader fileReader;
         FileWriter fileWriter;
@@ -45,6 +54,7 @@ public class Model {
         // Create a pattern from regex
         Pattern pattern = Pattern.compile(timeRegex);
         Matcher matcher;
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
 
         fileReader = new FileReader(logPathName + primaryFileName);
         reader = new BufferedReader(fileReader);
@@ -60,27 +70,30 @@ public class Model {
         while (line != null) {
 
             if (line.contains(paramName+"=") || line.contains(paramName+" =") || line.contains(paramName+" ") || line.contains(paramName+"  ")) {
-                int count = 0;
                 long system_ts;
-                long durationInNano;
+                long stream_ts;
+                boolean firstMatch = true;
                 System.out.println(line);
                 //System.out.print(line.indexOf(paramName) + " ");
                 // Create a matcher for the input String
                 matcher = pattern.matcher(line);
 
-                // Get the subsequence
-                // using find() method
-                //System.out.println(matcher.find());
                 while(matcher.find()) {
-                    System.out.printf("matcher: %s\n", matcher.group(1));
+//                    System.out.printf("matcher: %s\n", matcher.group(1));
+                    // Quirk: fix the hour format mismatch
                     String time = "0" + matcher.group(1);
 
-                    System.out.println("Time: " + time);
-                    //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSSSS");
-                    DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
+//                    System.out.println("Time: " + time);
                     LocalTime localTime = LocalTime.parse(time, formatter);
-                    //System.out.println("localTime in nanoseconds:      " + localTime.toNanoOfDay());
-                    System.out.println("localTime nanoseconds field:   " + localTime.getNano());
+                    if (firstMatch) {
+                        system_ts = localTime.getNano();
+                        System.out.println("System TS in nanoseconds:   " + system_ts);
+                        firstMatch = false;
+                    } else {
+                        stream_ts = localTime.getNano();
+                        System.out.println("Stream TS in nanoseconds:   " + stream_ts);
+                        operator.op(stream_ts);
+                    }
                 }
 
 //                boolean matches = matcher.matches();
@@ -103,7 +116,6 @@ public class Model {
         writer.close();
         fileWriter.close();
 
-        return true;
     }
 
 }

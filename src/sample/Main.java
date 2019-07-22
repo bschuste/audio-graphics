@@ -20,19 +20,16 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        Controller control = new Controller("","","","");
+
+        View view = new View(primaryStage);
+        Model model = new Model();
+
+        Controller control = new Controller(view, model);
 
         control.filterData();
 
-        View view = new View();
-        view.Draw();
-        //view.LineChartSample();
-        Group root = new Group(view.getLineChart());
+        control.updateView();
 
-        primaryStage.setTitle("Timestamps");
-        primaryStage.setResizable(true);
-        primaryStage.setScene(new Scene(root, 600, 400));
-        primaryStage.show();
     }
 
 
