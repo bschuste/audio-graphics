@@ -14,6 +14,8 @@ public class Controller {
 
     private Model model;
     private View view;
+    private int start = 1;
+    private int number = 10;
 
     public Controller(View view, Model model) {
 
@@ -29,8 +31,10 @@ public class Controller {
         return true;
     }
 
-    public boolean updateView() {
-        view.Draw();
+    public boolean updateView(int start, int number) {
+        this.start = start;
+        this.number = number;
+        view.Draw(start, start+number);
         view.updateView();
         return true;
 
