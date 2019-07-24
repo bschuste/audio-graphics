@@ -1,5 +1,3 @@
-package sample;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Cursor;
@@ -11,7 +9,8 @@ import javafx.scene.chart.XYChart;
 import javafx.stage.Stage;
 
 public class View {
-    private XYChart.Series series;
+    private XYChart.Series primarySeries;
+    private XYChart.Series secondarySeries;
     private int curIndex = 0;
 
     private int xStart;
@@ -29,7 +28,7 @@ public class View {
     private boolean initChart() {
         for (int i=1; i<100; i++) {
 
-            addData(40*i);
+            addData(0, 40*i);
 //            series.getData().add(new XYChart.Data(i, 0.040*i));
         }
 
@@ -53,14 +52,19 @@ public class View {
         return true;
     }
 
-    public void addData(long value) {
+    public void addData(int indexSeries, long value) {
         int millis;
         curIndex++;
 
         millis = (int) (value / (long)1000000);
-        series.getData().add(new XYChart.Data(curIndex, millis));
+        if (indexSeries == 0) {
+            primarySeries.getData().add(new XYChart.Data(curIndex, millis));
+        } else {
+            secondarySeries.getData().add(new XYChart.Data(curIndex, millis));
+        }
 
         System.out.println("value: " + value + "  millis: " + millis);
+        //Find Minimum and Maximum value of the series
         if (millis > yEnd) {
             yEnd = millis;
         }
@@ -70,9 +74,21 @@ public class View {
         System.out.println("yStart: " + yStart + "   yEnd: " + yEnd);
     }
 
+    public boolean initSeries (int indexSeries, String seriesName) {
+        if (indexSeries == 0) {
+            primarySeries = new XYChart.Series();
+            primarySeries.setName(seriesName);
+        } else {
+            secondarySeries = new XYChart.Series();
+            secondarySeries.setName(seriesName.toString());
+        }
+        return true;
+    }
+
     public boolean Init () {
-        series = new XYChart.Series();
-        series.setName("Incoming Data");
+        String name = "Newly Incoming Data";
+        primarySeries = new XYChart.Series();
+        primarySeries.setName(name);
         return true;
     }
 
@@ -91,8 +107,6 @@ public class View {
         //Init data only for test right now. The callback from Model should feed the chart
         //initChart();
 
-        //Find Minimum and Maximum value of the series
-
 
 
         //Defining X axis
@@ -102,20 +116,20 @@ public class View {
 
         System.out.println("xEnd: " + xEnd);
 
-        NumberAxis xAxis = new NumberAxis(xStart, xEnd, xIncrement);
-        xAxis.setLabel("Sequence Number");
+        NumberAxis xAxis = new NumberAxis("Sequence Number", xStart, xEnd + xIncrement, xIncrement);
+//        xAxis.setLabel("Sequence Number");
 
         //Defining Y axis
         //yStart = 0;
         //yEnd   = 4000;
         //yIncrement = 1;
-        NumberAxis yAxis = new NumberAxis(yStart, yEnd, yIncrement);
-        xAxis.setLabel("PTS (ms)");
+        NumberAxis yAxis = new NumberAxis("PTS (ms)", yStart, yEnd + yIncrement, yIncrement);
+//        yAxis.setLabel("PTS (ms)");
 
         mLinechart = new LineChart(xAxis, yAxis);
-        mLinechart.getData().add(series);
+        mLinechart.getData().add(primarySeries);
 
-        mLinechart.setCreateSymbols(false); //hide dots
+        mLinechart.setCreateSymbols(false); //false: hide dots
 
         return true;
     }

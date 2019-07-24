@@ -1,8 +1,3 @@
-package sample;
-
-import javafx.scene.Group;
-import javafx.scene.Scene;
-
 import java.io.IOException;
 
 //TODO Interaction with User in a loop
@@ -29,7 +24,7 @@ public class Controller {
 
     public boolean filterData()  throws IOException {
 
-        model.retrieveData("", (long value) -> { view.addData(value); });
+        model.retrieveData("", (long value) -> { view.addData(0, value); });
 
         return true;
     }
