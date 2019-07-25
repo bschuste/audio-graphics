@@ -10,7 +10,6 @@ public class Model {
 
     private String logPathName = "./resources/";
     private String paramName = "pts"; // Key for data extraction
-    private String outputFileName;
     private List<String> fileNameList;
     private List<Long> summaryList;
 
@@ -55,7 +54,6 @@ public class Model {
         BufferedWriter writer;
         int curFileIndex = 0;
         boolean skip = true;
-       // String deLimiter = "[ =]+";
         String fileWriterName = logPathName + "output.log";
         String timeRegex = "(\\d:\\d\\d:\\d\\d.\\d\\d\\d\\d\\d\\d\\d\\d\\d)";
         // Create a pattern from regex
@@ -64,7 +62,7 @@ public class Model {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
 
         if (!outputFileName.isEmpty()) {
-            this.outputFileName = outputFileName;
+            fileWriterName = outputFileName;
         }
         System.out.printf("Output file name %s%n", fileWriterName);
         fileWriter = new FileWriter(fileWriterName);
@@ -103,15 +101,15 @@ public class Model {
                                 system_ts = localTime.toNanoOfDay();
 //                            System.out.println("System TS in nanoseconds:   " + system_ts);
                                 firstMatch = false;
-                                operator.op(curFileIndex, system_ts);
+ //                               operator.op(curFileIndex, system_ts);
                                 numOfEntries++;
                             } else {
                                 stream_ts = localTime.toNanoOfDay();
 //                            System.out.println("Stream TS in nanoseconds:   " + stream_ts);
-//                            if (stream_ts != 0) {
-//                                operator.op(curFileIndex, stream_ts);
-//                                numOfEntries++;
-//                            }
+                                if (stream_ts != 0) {
+                                    operator.op(curFileIndex, stream_ts);
+                                    numOfEntries++;
+                                }
                             }
                         }
                         writer.write(line + System.lineSeparator());
