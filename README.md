@@ -9,3 +9,6 @@ The user can interact with the graphics by clicking:
  - Anywhere on the window to toggle between a full view or a narrowed view
  - On one of the buttons to shift **left** or **right**
  - One the **dot** button to toggle between a dot-marked view or not
+
+To build and test the application, import an IntelliJ project from the files.
+As configuration, choose Application and then Main as the main class.
