@@ -15,7 +15,6 @@ public class Controller {
     private Model model;
     private View view;
     private int start = 1;
-    private int number = 10;
 
     public Controller(View view, Model model) {
 
@@ -26,20 +25,21 @@ public class Controller {
 
     public boolean filterData()  throws IOException {
 
-        model.retrieveData("", (long value) -> { view.addData(0, value); });
+        model.retrieveData("", (int index, long value) -> { view.addData(index, value); });
 
         return true;
     }
 
-    public boolean updateView(int start, int number) {
-        this.start = start;
-        this.number = number;
-        view.Draw(start, start+number);
+    public boolean updateView() {
+        view.Draw(start, start+view.getRange());
         view.updateView();
         return true;
 
     }
+
     public boolean generateSummary() {
+        System.out.println("Receiver Number of Entries:" + model.getNumOfEntries(0));
+        System.out.println("Sender   Number of Entries:" + model.getNumOfEntries(1));
         return true;
     }
 

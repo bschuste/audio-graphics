@@ -2,23 +2,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.*;
 import javafx.scene.control.Button;
-import javafx.scene.input.KeyCharacterCombination;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.control.TextField;
-import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class View {
     private XYChart.Series primarySeries;
     private XYChart.Series secondarySeries;
-    private ObservableList<XYChart.Series<Double,Double>> lineChartData;
+    private ObservableList<XYChart.Series<Long,Long>> lineChartData;
+    private List<Serie> mSerieList;
     private int curIndex = 0;
 
     private boolean dots = false;
@@ -32,27 +31,22 @@ public class View {
     private int xIncrement;
     private NumberAxis xAxis;
 
-
-    private int yStart = 1000000;
+    private int yStart = Integer.MAX_VALUE;
     private int yEnd = 40;
-    private int yIncrement = 1; //milliseconds
+    private int yIncrement = 40; //milliseconds
 
     private LineChart mLinechart;
     private Stage primaryStage;
 
-    private boolean initChart() {
-        for (int i=1; i<100; i++) {
-
-            addData(0, 40*i);
-//            series.getData().add(new XYChart.Data(i, 0.040*i));
-        }
-
-        return true;
-    }
 
     public View(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        mSerieList = new ArrayList<>(2);
         System.out.println("Creating a graphics View");
+    }
+
+    static public int getRange() {
+        return 25;
     }
 
     public void toggleDots() {
@@ -67,7 +61,7 @@ public class View {
         leftButton.setLayoutY(410);
         leftButton.setOnMouseClicked((new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
-                setDeltaStart(-10);
+                setDeltaStart(-getRange());
                 System.out.println("Go left [" + xStart + ".." + xEnd + "]");
             }
         }));
@@ -88,7 +82,7 @@ public class View {
         rightButton.setLayoutY(410);
         rightButton.setOnMouseClicked((new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
-                setDeltaStart(+10);
+                setDeltaStart(+getRange());
                 System.out.println("Go right [" + xStart + ".." + xEnd + "]");
             }
         }));
@@ -100,49 +94,19 @@ public class View {
                 System.out.println("Full Range");
                 System.out.println("Mouse at (" + e.getX() + "," + e.getY() + ")");
                 if ((e.getX() >= 68.0 && e.getX() <= 485.0)) {
-                    region = (int) (1.0 + (e.getX() - 68.0) * 44.0 / (485.0 - 68.0));
-                    System.out.println("Region " + region + "  " + (1.0 + (e.getX() - 68.0) * 44.0 / (485.0 - 68.0)));
+                    region = (int) (1.0 + (e.getX() - 68.0) * (maxSequenceNumber-1) / (485.0 - 68.0));
+                    System.out.println("Region " + region + "  " + (1.0 + (e.getX() - 68.0) * (maxSequenceNumber-1) / (485.0 - 68.0)));
                 }
                 if (!fullRange) {
                     setRange(minSequenceNumber, maxSequenceNumber);
                 } else {
-                    setRange(region, region + 10);
+                    setRange(region, region + getRange());
                 }
                 fullRange = !fullRange;
             }
         };
         //Registering the event filter
         mLinechart.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
-
-/*
-        // Creating a text field
-        TextField textField = new TextField("Commands: full range, toggle dots, shift left, shift right");
-
-        //Setting the position of the text field
-        textField.setLayoutX(50);
-        textField.setLayoutY(410);
-
-        //Creating the keyboard event handler
-        EventHandler<KeyEvent> eventKeyHandler = new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent e) {
-                System.out.println("Hello Key");
-            }
-        };
-
-         //Adding an event handler to the text field
-        textField.addEventHandler(KeyEvent.KEY_TYPED, eventKeyHandler);
-
-        // Handle TextField text changes.
-        textField.textProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("TextField Text Changed (newValue: " + newValue + ")");
-        });
-
-        // Handle TextField enter key event.
-        textField.setOnAction((event) -> {
-            System.out.println("TextField Action");
-        });
-*/
 
         Group root = new Group(mLinechart, leftButton, dotsButton, rightButton);
 
@@ -155,16 +119,11 @@ public class View {
 
     public void addData(int indexSeries, long value) {
         int millis;
-        curIndex++;
-
+        // Convert nanos to millis
         millis = (int) (value / (long)1000000);
-        if (indexSeries == 0) {
-            primarySeries.getData().add(new XYChart.Data(curIndex, millis));
-        } else {
-            secondarySeries.getData().add(new XYChart.Data(curIndex, millis));
+        if (indexSeries == 1) {
+            curIndex++;
         }
-
-        System.out.println("value: " + value + "  millis: " + millis);
         //Find Minimum and Maximum value of the series
         if (millis > yEnd) {
             yEnd = millis;
@@ -172,33 +131,19 @@ public class View {
         if (millis < yStart) {
             yStart = millis;
         }
-        System.out.println("yStart: " + yStart + "   yEnd: " + yEnd);
         maxSequenceNumber = curIndex;
-    }
-
-    public boolean initSeries (int indexSeries, String seriesName) {
-        if (indexSeries == 0) {
-            primarySeries = new XYChart.Series();
-            primarySeries.setName(seriesName);
-        } else {
-            secondarySeries = new XYChart.Series();
-            secondarySeries.setName(seriesName.toString());
-        }
-        lineChartData = FXCollections.observableArrayList(
-                new LineChart.Series<>(),
-                new LineChart.Series<>()
-        );
-
-        return true;
+        mSerieList.get(indexSeries).addData(value);
     }
 
     public boolean Init () {
         String name = "Receiver Data";
         primarySeries = new XYChart.Series();
         primarySeries.setName(name);
+        mSerieList.add(new Serie(name));
         name = "Sender Data";
         secondarySeries = new XYChart.Series();
         secondarySeries.setName(name);
+        mSerieList.add(new Serie(name));
         return true;
     }
 
@@ -218,7 +163,7 @@ public class View {
         } else {
             this.xEnd   = this.curIndex;
         }
-        xIncrement = 1;
+        xIncrement = 10;
 
 
         System.out.println("xStart: " + xStart);
@@ -230,7 +175,11 @@ public class View {
         NumberAxis yAxis = new NumberAxis("PTS (ms)", yStart, yEnd + yIncrement, yIncrement);
 
         mLinechart = new LineChart(xAxis, yAxis);
-        mLinechart.getData().add(primarySeries);
+        //mLinechart.getData().add(primarySeries);
+        //mLinechart.getData().add(secondarySeries);
+        for (Serie serie : mSerieList) {
+            mLinechart.getData().add(serie.getSerie());
+        }
         mLinechart.setCreateSymbols(dots); //false: hide dots
         return true;
     }
@@ -256,9 +205,6 @@ public class View {
             return true;
         }
         return false;
-    }
-    public LineChart getLineChart() {
-        return mLinechart;
     }
 
     public boolean LineChartSample() {
