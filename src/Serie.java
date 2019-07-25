@@ -35,4 +35,8 @@ public class Serie {
 
         return mSerie;
     }
+
+    public double getSlope() {
+        return (maxValue - minValue ) / (maxSequenceNumber - minSequenceNumber);
+    }
 }
